@@ -22,25 +22,30 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(
-          value: Auth(),
+        // We should use this way of setting up the ChangeNotifierProvider
+        // with create (not the .value() constructor with value), since we are
+        // creating a new Products().
+        ChangeNotifierProvider(
+          create: (ctx) => Auth(),
         ),
         ChangeNotifierProxyProvider<Auth, Products>(
-          builder: (ctx, auth, previousProducts) => Products(
-                auth.token,
-                auth.userId,
-                previousProducts == null ? [] : previousProducts.items,
-              ),
+          update: (ctx, auth, previousProducts) => Products(
+              auth.token,
+              auth.userId,
+              previousProducts == null ? [] : previousProducts.items),
+          create: null,
         ),
-        ChangeNotifierProvider.value(
-          value: Cart(),
+        ChangeNotifierProvider(
+          // Note: Can also just use _ for argument since we aren't using it.
+          create: (ctx) => Cart(),
         ),
         ChangeNotifierProxyProvider<Auth, Orders>(
-          builder: (ctx, auth, previousOrders) => Orders(
-                auth.token,
-                auth.userId,
-                previousOrders == null ? [] : previousOrders.orders,
-              ),
+          update: (ctx, auth, previousOrders) => Orders(
+            auth.token,
+            auth.userId,
+            previousOrders == null ? [] : previousOrders.orders,
+          ),
+          create: null,
         ),
       ],
       child: Consumer<Auth>(
